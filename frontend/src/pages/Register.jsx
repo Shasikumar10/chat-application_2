@@ -1,86 +1,49 @@
-import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    Container,
-  } from "@mui/material";
-  import { useState } from "react";
-  import axios from "axios";
-  import { useNavigate } from "react-router-dom";
-  import { useAuth } from "../context/AuthContext";
-  
-  const Register = () => {
-    const { setUser } = useAuth();
-    const navigate = useNavigate();
-    const [form, setForm] = useState({ name: "", email: "", password: "" });
-  
-    const handleChange = (e) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
-    };
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      try {
-        const res = await axios.post("http://localhost:5000/api/users/register", form);
-        setUser(res.data);
-        navigate("/home");
-      } catch (err) {
-        alert(err.response?.data?.message || "Registration failed");
-      }
-    };
-  
-    return (
-      <Container maxWidth="sm">
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            mt: 8,
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            boxShadow: 3,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h5" mb={2}>Register</Typography>
-          <TextField
-            name="name"
-            label="Name"
-            value={form.name}
-            onChange={handleChange}
-            fullWidth
-            required
-            margin="normal"
-          />
-          <TextField
-            name="email"
-            label="Email"
-            value={form.email}
-            onChange={handleChange}
-            fullWidth
-            required
-            type="email"
-            margin="normal"
-          />
-          <TextField
-            name="password"
-            label="Password"
-            value={form.password}
-            onChange={handleChange}
-            fullWidth
-            required
-            type="password"
-            margin="normal"
-          />
-          <Button variant="contained" type="submit" fullWidth sx={{ mt: 2 }}>
-            Register
-          </Button>
-        </Box>
-      </Container>
-    );
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+
+const Register = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const history = useHistory();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post('http://localhost:5000/api/users/register', { name, email, password });
+      history.push('/login'); // Redirect to login after successful registration
+    } catch (err) {
+      console.error('Registration failed', err);
+    }
   };
-  
-  export default Register;
-  
+
+  return (
+    <div>
+      <h2>Register</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  );
+};
+
+export default Register;

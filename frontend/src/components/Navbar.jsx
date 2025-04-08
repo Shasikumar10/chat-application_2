@@ -1,21 +1,26 @@
-// src/components/Navbar.jsx
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
 
 const Navbar = () => {
+  const { user, logout } = useContext(AuthContext);
+
   return (
-    <AppBar position="static" sx={{ bgcolor: '#1976d2' }}>
-      <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          🔥 ChatApp
-        </Typography>
-        <Box>
-          <Button color="inherit" component={Link} to="/">Login</Button>
-          <Button color="inherit" component={Link} to="/register">Register</Button>
-          <Button color="inherit" component={Link} to="/home">Home</Button>
-        </Box>
-      </Toolbar>
-    </AppBar>
+    <nav>
+      <Link to="/">Home</Link>
+      {user ? (
+        <>
+          <Link to="/chat">Chat</Link>
+          <button onClick={logout}>Logout</button>
+        </>
+      ) : (
+        <>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Register</Link>
+        </>
+      )}
+    </nav>
   );
 };
 

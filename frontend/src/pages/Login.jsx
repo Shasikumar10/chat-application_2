@@ -1,77 +1,46 @@
-import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    Container,
-  } from "@mui/material";
-  import { useState } from "react";
-  import axios from "axios";
-  import { useNavigate } from "react-router-dom";
-  import { useAuth } from "../context/AuthContext";
-  
-  const Login = () => {
-    const { setUser } = useAuth();
-    const navigate = useNavigate();
-    const [form, setForm] = useState({ email: "", password: "" });
-  
-    const handleChange = (e) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
-    };
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      try {
-        const res = await axios.post("http://localhost:5000/api/users/login", form);
-        setUser(res.data);
-        navigate("/home");
-      } catch (err) {
-        alert(err.response?.data?.message || "Login failed");
-      }
-    };
-  
-    return (
-      <Container maxWidth="sm">
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            mt: 8,
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            boxShadow: 3,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h5" mb={2}>Login</Typography>
-          <TextField
-            name="email"
-            label="Email"
-            value={form.email}
-            onChange={handleChange}
-            fullWidth
-            required
-            type="email"
-            margin="normal"
-          />
-          <TextField
-            name="password"
-            label="Password"
-            value={form.password}
-            onChange={handleChange}
-            fullWidth
-            required
-            type="password"
-            margin="normal"
-          />
-          <Button variant="contained" type="submit" fullWidth sx={{ mt: 2 }}>
-            Login
-          </Button>
-        </Box>
-      </Container>
-    );
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import axios from 'axios';
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
+
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext);
+  const history = useHistory();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
+      login(data); // Set the user in context
+      history.push('/chat'); // Redirect to chat page
+    } catch (err) {
+      console.error('Login failed', err);
+    }
   };
-  
-  export default Login;
-  
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;

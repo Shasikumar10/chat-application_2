@@ -1,23 +1,38 @@
-// src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem('chat-user')) || null
-  );
+  const [user, setUser] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
-    localStorage.setItem('chat-user', JSON.stringify(user));
-  }, [user]);
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Decode and verify token if needed, and set the user state
+      // Set user state with decoded information if necessary
+      setUser({ token }); // Just as an example, adjust based on how you structure the user data
+    }
+  }, []);
+
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem('token', userData.token);
+    history.push('/chat'); // Redirect to chat page or dashboard
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    history.push('/login'); // Redirect to login page
+  };
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use AuthContext
-export const useAuth = () => useContext(AuthContext);
+export default AuthContext;

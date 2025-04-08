@@ -1,21 +1,26 @@
-// src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Home from "./pages/Home";
-import Navbar from "./components/Navbar";
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Chat from './pages/Chat';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import Navbar from './components/Navbar';
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Home />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Navbar />
+        <Switch>
+          <Route path="/chat" component={Chat} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/" exact component={Home} />
+        </Switch>
+      </Router>
+    </AuthProvider>
   );
-}
+};
 
 export default App;

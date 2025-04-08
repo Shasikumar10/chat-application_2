@@ -4,54 +4,60 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const socketio = require("socket.io");
 const http = require("http");
+const { Server } = require("socket.io");
 const userRoutes = require("./routes/userRoutes");
 
+// Load environment variables
 dotenv.config();
 
+// Initialize Express app
 const app = express();
 
-// HTTP server for socket.io
+// Create HTTP server
 const server = http.createServer(app);
 
-// Initialize socket.io
-const io = socketio(server);
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173", // Your frontend URL
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// API Routes
 app.use("/api/users", userRoutes);
 
-// Socket.io logic
-io.on("connection", (socket) => {
-  console.log("New client connected");
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-  // Handle incoming messages
+// Socket.IO logic
+io.on("connection", (socket) => {
+  console.log("🔌 New user connected:", socket.id);
+
   socket.on("send_message", (data) => {
-    io.emit("receive_message", data); // broadcast to all clients
+    console.log("📨 Message received:", data);
+    io.emit("receive_message", data); // Broadcast to all clients
   });
 
-  // Handle disconnect
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    console.log("❌ User disconnected:", socket.id);
   });
 });
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch((err) => {
-    console.log("Error connecting to MongoDB:", err);
-  });
-
-// Start the server
+// Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
