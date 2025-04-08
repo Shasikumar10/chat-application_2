@@ -1,31 +1,30 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';  // Correctly using useNavigate
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const history = useHistory();
+  const navigate = useNavigate();  // Replaced history with useNavigate
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Decode and verify token if needed, and set the user state
-      // Set user state with decoded information if necessary
-      setUser({ token }); // Just as an example, adjust based on how you structure the user data
+      // You could also decode the token and verify it if needed
+      setUser({ token });  // Store the token or user data if needed
     }
   }, []);
 
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem('token', userData.token);
-    history.push('/chat'); // Redirect to chat page or dashboard
+    navigate('/chat');  // Correctly using navigate instead of history.push
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('token');
-    history.push('/login'); // Redirect to login page
+    navigate('/login');  // Correctly using navigate instead of history.push
   };
 
   return (

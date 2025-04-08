@@ -1,25 +1,17 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import Chat from './pages/Chat';
+import { Route, Routes, Navigate } from 'react-router-dom'; // Add Navigate import
 import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
-import Navbar from './components/Navbar';
+import Register from './pages/Register'; 
+import Chat from './pages/Chat'; 
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Navbar />
-        <Switch>
-          <Route path="/chat" component={Chat} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route path="/" exact component={Home} />
-        </Switch>
-      </Router>
-    </AuthProvider>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" />} />  {/* Redirect root to login */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/chat" element={<Chat />} />
+    </Routes>
   );
 };
 

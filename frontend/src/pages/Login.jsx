@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
 import axios from 'axios';
-import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
-  const history = useHistory();
+  const navigate = useNavigate();  // Use useNavigate hook
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
       login(data); // Set the user in context
-      history.push('/chat'); // Redirect to chat page
+      navigate('/chat'); // Redirect to chat page using navigate
     } catch (err) {
       console.error('Login failed', err);
     }
@@ -39,6 +38,10 @@ const Login = () => {
         />
         <button type="submit">Login</button>
       </form>
+      
+      <p>
+        Don't have an account? <button onClick={() => navigate('/register')}>Register</button>
+      </p>
     </div>
   );
 };

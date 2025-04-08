@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const history = useHistory();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
+    }
+
     try {
+      // Send registration request to the backend
       const { data } = await axios.post('http://localhost:5000/api/users/register', { name, email, password });
-      history.push('/login'); // Redirect to login after successful registration
+      
+      // If registration is successful, redirect to login page
+      navigate('/login');
     } catch (err) {
-      console.error('Registration failed', err);
+      setError('Registration failed, please try again');
+      console.error('Error during registration:', err);
     }
   };
 
   return (
     <div>
       <h2>Register</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -40,8 +52,17 @@ const Register = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
         <button type="submit">Register</button>
       </form>
+      <p>
+        Already have an account? <button onClick={() => navigate('/login')}>Login</button>
+      </p>
     </div>
   );
 };

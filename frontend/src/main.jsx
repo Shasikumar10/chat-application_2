@@ -1,12 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client'; // Updated import for React 18
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-ReactDOM.render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>,
-  document.getElementById('root')
+const root = ReactDOM.createRoot(document.getElementById('root')); // createRoot instead of render
+
+root.render(
+  <Router>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </Router>
 );
