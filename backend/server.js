@@ -1,33 +1,23 @@
 const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const userRoutes = require('./routes/userRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 const cors = require('cors');
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
+dotenv.config();
+connectDB();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
+app.use('/api/user', userRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/message', messageRoutes);
 
-  socket.on('sendMessage', (message) => {
-    console.log('Message received:', message);
-    io.emit('receiveMessage', message); // Broadcast message to all connected clients
-  });
-
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
-});
-
-server.listen(5000, () => {
-  console.log('Server is running on http://localhost:5000');
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

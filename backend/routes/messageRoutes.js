@@ -1,51 +1,27 @@
-const express = require("express");
-const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
-const Message = require("../models/Message");
-const Chat = require("../models/Chat");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-// Send a Message
-router.post("/", protect, async (req, res) => {
-  const { content, chatId } = req.body;
+const protect = async (req, res, next) => {
+  let token;
 
-  if (!content || !chatId) {
-    return res.status(400).json({ message: "Invalid data passed" });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      req.user = await User.findById(decoded.id).select('-password');
+      next();
+    } catch (error) {
+      res.status(401).json({ message: 'Not authorized, token failed' });
+    }
   }
 
-  const newMessage = {
-    sender: req.user._id,
-    content,
-    chat: chatId,
-  };
-
-  try {
-    let message = await Message.create(newMessage);
-    message = await message.populate("sender", "name email");
-    message = await message.populate("chat");
-    message = await message.populate({
-      path: "chat.users",
-      select: "name email",
-    });
-
-    await Chat.findByIdAndUpdate(chatId, { latestMessage: message });
-
-    res.json(message);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  if (!token) {
+    res.status(401).json({ message: 'Not authorized, no token' });
   }
-});
+};
 
-// Get All Messages of a Chat
-router.get("/:chatId", protect, async (req, res) => {
-  try {
-    const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "name email")
-      .populate("chat");
-
-    res.json(messages);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-module.exports = router;
+module.exports = { protect };
